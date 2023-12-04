@@ -1,2 +1,0 @@
-product_id,product_name,product_version,min_term,max_term,min_principle_amount,max_principle_amount,min_interest,max_interest,min_origination_amount,max_origination_amount
-CL_1.0,Cash Loan,1.0,3,24,50000,500000,8,15,2000,10000
