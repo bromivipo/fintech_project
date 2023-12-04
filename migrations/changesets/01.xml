@@ -8,6 +8,53 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
         http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
     
-    
+    <changeSet author="brom" id="create-product">
+        <createTable remarks="table for info about products" tableName="product">
+            <column remarks="unique id" name="product_id" type="VARCHAR">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="product_pkey"/>
+            </column>
+            
+            <column remarks="name for clients" name="product_name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="version of the product(products can change)" name="product_version" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="min term for this type of loan in months" name="min_term" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="max term for this type of loan in months" name="max_term" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="min principle amount for this type of loan" name="min_principle_amount" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="max principle amount for this type of loan" name="max_principle_amount" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="min interest for this type of loan in percents" name="min_interest" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="max interest for this type of loan in percents" name="max_interest" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="min origination amount for this type of loan" name="min_origination_amount" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="max origination amount for this type of loan" name="max_origination_amount" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+    </changeSet>
     
 </databaseChangeLog>

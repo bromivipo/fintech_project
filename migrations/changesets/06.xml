@@ -1,0 +1,46 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+
+    <changeSet author="brom" id="createIndexesInProduct">
+        <createIndex indexName="index_product" tableName="product">
+            <column name="product_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="brom" id="createIndexesInAgreement">
+        <createIndex indexName="index_product_in_agreement" tableName="agreement">
+            <column name="product_id"/>
+        </createIndex>
+
+        <createIndex indexName="index_agreement" tableName="agreement">
+            <column name="agreement_id"/>
+        </createIndex>
+
+        <createIndex indexName="index_agreement_client" tableName="agreement">
+            <column name="client_id"/>
+        </createIndex>
+    </changeSet>	
+
+    <changeSet author="brom" id="createIndexesInClient">
+        <createIndex indexName="index_client" tableName="client">
+            <column name="client_id"/>
+        </createIndex>
+    </changeSet>	
+
+    <changeSet author="brom" id="createIndexesInPayment">
+        <createIndex indexName="index_payment" tableName="schedule_payment">
+            <column name="payment_id"/>
+        </createIndex>
+
+        <createIndex indexName="index_agreement_in_payment" tableName="schedule_payment">
+            <column name="agreement_id"/>
+        </createIndex>
+    </changeSet>	
+ </databaseChangeLog>

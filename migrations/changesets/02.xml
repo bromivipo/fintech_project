@@ -1,0 +1,41 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+    
+    <changeSet author="brom" id="create-client">
+
+        <createTable remarks="Table for info about clients" tableName="client">
+            <column remarks="unique id" autoIncrement="true" name="client_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="client_pkey"/>
+            </column>
+            
+            <column remarks="name, second name and surname" name="full_name" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="current age of client in years" name="age" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="clients phone number" name="phone_number" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="passport series and number" name="passport_details" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="monthly income according to what client have said" name="income" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+    </changeSet>
+    
+</databaseChangeLog>

@@ -1,0 +1,43 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+    
+    <changeSet author="brom" id="create-payment">
+
+        <createTable remarks="Table for scheduling payments" tableName="schedule_payment">
+            <column remarks="unique id" autoIncrement="true" name="payment_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="payments_pkey"/>
+            </column>
+            
+            <column remarks="agreement id from table agreement" name="agreement_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="time when payment should have been done" name="expected_payment_date" type="DATETIME"> </column>
+
+            <column remarks="date of the first day of paid period (if paid)" name="start_of_paid_period" type="DATETIME"> </column>
+
+            <column remarks="date of the last day of paid period (if paid)" name="end_of_paid_period" type="DATETIME"> </column>
+
+            <column remarks="amount paid for body of loan(if paid)" name="amount_for_loan" type="INTEGER"> </column>
+
+            <column remarks="amount paid for percents of loan(if paid)" name="amount_for_percent" type="INTEGER"> </column>
+
+            <column remarks="serial number of payment in the agreement" name="serial_number" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="in time, late, isn't paid" name="payment_status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+    </changeSet>
+    
+</databaseChangeLog>
