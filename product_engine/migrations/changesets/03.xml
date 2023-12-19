@@ -27,7 +27,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column remarks="principle amount in this agreement" name="principle_amount" type="INTEGER">
+            <column remarks="principle amount in this agreement" name="principle_amount" type="DOUBLE">
                 <constraints nullable="false"/>
             </column>
 
@@ -35,7 +35,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column remarks="origination amount in this agreement" name="origination_amount" type="INTEGER">
+            <column remarks="origination amount in this agreement" name="origination_amount" type="DOUBLE">
                 <constraints nullable="false"/>
             </column>
 
