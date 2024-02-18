@@ -19,7 +19,11 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column remarks="current age of client in years" name="age" type="INTEGER">
+            <column remarks="client birthday dd.mm.yyyy" name="birthday" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="clients email" name="email" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
 
