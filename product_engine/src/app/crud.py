@@ -64,10 +64,9 @@ def create_agreement(repo: GenericRepository, repo2: GenericRepository, repo3: G
     client["email"] = info["email"]
     client["phone_number"] = info["phone"]
     prod = repo.get_by_condition(models.Product.product_id == info["product_code"])
-
-    if prod is None:
+    if len(prod) == 0:
         return 0
-
+    prod = prod[0]
     try:
         client["income"] = int(info["salary"])
         client["birthday"] = datetime.datetime.strptime(str(info["birthday"]), "%d.%m.%Y").strftime("%d.%m.%Y")

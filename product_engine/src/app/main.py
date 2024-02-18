@@ -36,13 +36,13 @@ def delete_product(product_id: str, repo: GenericRepository = Depends(create_rep
     return db_product
 
 @app.post("/agreement")
-def post_agreement(data, repo: GenericRepository = Depends(create_repo(models.Product)), repo2: GenericRepository = Depends(create_repo(models.Agreement)),  repo3: GenericRepository = Depends(create_repo(models.Client))):
+def post_agreement(d, repo: GenericRepository = Depends(create_repo(models.Product)), repo2: GenericRepository = Depends(create_repo(models.Agreement)),  repo3: GenericRepository = Depends(create_repo(models.Client))):
     errors = ["No product with a given code",
               "Wrong data types",
               "Term is out of range",
               "Interest is out of range",
               "Principle amount is out of range"]
-    agreement = create_agreement(repo, repo2, repo3 ,data)
+    agreement = create_agreement(repo, repo2, repo3, d)
     if agreement <= 0:
         raise HTTPException(status_code=400, detail=errors[-agreement])
     return agreement
