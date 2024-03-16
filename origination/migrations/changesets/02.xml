@@ -1,0 +1,53 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+    
+    <changeSet author="brom" id="create-agreement">
+
+        <createTable  remarks="Table with info about agreements" tableName="agreement">
+            <column remarks="unique id" name="agreement_id" type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="agreement_pkey"/>
+            </column>
+            
+            <column remarks="product id from table product" name="product_id" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="client id from table client" name="client_id" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="loan term in months in this agreement" name="term" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="principle amount in this agreement" name="principle_amount" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="interest in this agreement" name="interest" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="origination amount in this agreement" name="origination_amount" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="date of signing the agreement" name="agreement_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="new, activated or closed" name="agreement_status" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+    </changeSet>
+    
+</databaseChangeLog>
