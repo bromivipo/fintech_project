@@ -1,8 +1,9 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
-from crud import create_repo, GenericRepository, add_product, create_agreement
+from crud import create_repo, GenericRepository, add_product, create_agreement, update_status_new
 import models
 from database import SessionLocal, engine
+import json
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -46,3 +47,9 @@ def post_agreement(d, repo: GenericRepository = Depends(create_repo(models.Produ
     if agreement <= 0:
         raise HTTPException(status_code=400, detail=errors[-agreement])
     return agreement
+
+@app.post("/origination_received_agreements")
+def update_agr_status(ids, repo: GenericRepository = Depends(create_repo(models.Agreement))):
+    ids = json.loads(ids)
+    ids = ids["ids"]
+    update_status_new(ids, repo)

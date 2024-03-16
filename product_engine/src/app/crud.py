@@ -30,7 +30,10 @@ class GenericRepository:
     def delete_by_condition(self, condition):
         self.db.query(self.entity).filter(condition).delete()
         self.db.commit()
-
+    
+    def update_by_condition(self, condition, update_col, update_val):
+        self.db.query(self.entity).filter(condition).update({update_col: update_val})
+        self.db.commit()
 
 def add_product(data, repo: GenericRepository):
     ints = ['min_term', 'max_term', 'min_principle_amount', 'max_principle_amount', 'min_origination_amount', 'max_origination_amount']
@@ -90,6 +93,7 @@ def create_agreement(repo: GenericRepository, repo2: GenericRepository, repo3: G
     client = check_client(repo3, client)
     agreement["client_id"] = int(client)
     agreement["product_id"] = str(info["product_code"]) 
+    agreement['agreement_status'] = "NEW"
 
     new_agr = models.Agreement(agreement)
     # repo2 = GenericRepository(db, models.Agreement)
@@ -109,6 +113,9 @@ def check_client(repo: GenericRepository, data):
     else:
         return client.client_id
 
+def update_status_new(ids, repo: GenericRepository):
+    for id in ids:
+        repo.update_by_condition(models.Agreement.agreement_id == id, "agreement_status", "SENT_TO_ORIGINATION")
 
 # def get_db():
 #     db = SessionLocal()
