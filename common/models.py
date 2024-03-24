@@ -1,11 +1,12 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Double, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import Table
 import datetime
 import json
 
-from database import Base
-
+class Base(DeclarativeBase):
+    pass
 
 class Product(Base):
     __tablename__ = "product"

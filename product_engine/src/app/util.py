@@ -1,39 +1,8 @@
-from typing import Any
-from sqlalchemy.orm import Session
-from database import SessionLocal
 import json
 import datetime
-import models
+from common import models
+from common.generic_repo import GenericRepository
 import random
-from functools import lru_cache
-
-class GenericRepository:
-
-    def __init__(self, db:Session, entity:object):
-        self.db = db
-        self.entity = entity
-
-    def get_all(self):
-        return self.db.query(self.entity).all()
-    
-    def get_by_condition(self, condition):
-        return self.db.query(self.entity).filter(condition).all()
-
-    def check_by_condition(self, condition):
-        return self.db.query(self.entity).filter(condition).first()
-
-    def add(self, entity):
-        self.db.add(entity)
-        self.db.commit()
-        self.db.refresh(entity)
-
-    def delete_by_condition(self, condition):
-        self.db.query(self.entity).filter(condition).delete()
-        self.db.commit()
-    
-    def update_by_condition(self, condition, update_col, update_val):
-        self.db.query(self.entity).filter(condition).update({update_col: update_val})
-        self.db.commit()
 
 def add_product(data, repo: GenericRepository):
     ints = ['min_term', 'max_term', 'min_principle_amount', 'max_principle_amount', 'min_origination_amount', 'max_origination_amount']
@@ -95,7 +64,6 @@ def create_agreement(repo: GenericRepository, repo2: GenericRepository, repo3: G
     agreement['agreement_status'] = "NEW"
 
     new_agr = models.Agreement(agreement)
-    # repo2 = GenericRepository(db, models.Agreement)
     repo2.add(new_agr)
     return new_agr.agreement_id
 
@@ -115,19 +83,3 @@ def check_client(repo: GenericRepository, data):
 def update_status_new(ids, repo: GenericRepository):
     for id in ids:
         repo.update_by_condition(models.Agreement.agreement_id == id, "agreement_status", "SENT_TO_ORIGINATION")
-
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
-class create_repo:
-    def __init__(self, entity) -> None:
-        self.db: Session = SessionLocal()
-        self.entity = entity
-
-    @lru_cache
-    def __call__(self):
-        return GenericRepository(self.db, self.entity)

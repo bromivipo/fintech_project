@@ -1,9 +1,9 @@
 FROM python:3.10
 
-COPY /app /app/
-COPY requirements.txt /app
+COPY /app /app_dock
+COPY requirements.txt /app_dock
 
-WORKDIR /app
+WORKDIR /app_dock
 RUN pip install -r requirements.txt
 
-CMD ["uvicorn", "main:app", "--reload"]
+CMD ["python", "main.py"]

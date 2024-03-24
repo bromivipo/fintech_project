@@ -1,0 +1,130 @@
+version: "3"
+
+services:  
+  postgresql:
+    container_name: "fintech-postgresql"
+    image: postgres:15.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_MULTIPLE_DATABASES: product_engine, origination
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    networks:
+      - fintech-network
+    volumes:
+      - ./tools/database-dev/configs/create-multiple-db-with-users.sh:/docker-entrypoint-initdb.d/create-multiple-db-with-users.sh:ro
+    healthcheck:
+      test: "pg_isready -U postgres"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  pgadmin:
+    container_name: "fintech-pgadmin"
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    entrypoint: >
+      /bin/sh -c "
+      cp -f /pgadmin4/pgpass /var/lib/pgadmin/;
+      chmod 600 /var/lib/pgadmin/pgpass;
+      /entrypoint.sh
+      "
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "8080:80"
+    networks:
+      - fintech-network
+    volumes:
+      - ./tools/database-dev/configs/servers.json:/pgadmin4/servers.json:ro
+      - ./tools/database-dev/configs/pgpass:/pgadmin4/pgpass:ro
+    
+  liquibase:
+    container_name: "liquibase"
+    image: liquibase/liquibase:4.19.0
+    networks:
+      - fintech-network
+    volumes:
+      - ./product_engine/migrations:/app
+      - ./origination/migrations:/app2
+    command: ["sh", "-c", "liquibase --defaultsFile=/app/dev.properties update && liquibase --defaultsFile=/app2/dev.properties update"]
+    depends_on:
+      postgresql:
+        condition: "service_healthy"
+    links:
+      - "postgresql"
+
+  pe:
+    container_name: "pe"
+    build:
+      context: ./product_engine/src/
+    environment:
+      HOST: "0.0.0.0"
+      PORT: 5001
+      ENGINE: "postgresql://postgres:postgres@postgresql:5432/product_engine"
+      ORIG_PATH: "origination:5002"
+    expose:
+      - "5001"
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./common:/usr/local/lib/python3.10/site-packages/common:ro
+    restart: unless-stopped
+    networks:
+      - fintech-network
+    depends_on:
+      liquibase:
+        condition: service_completed_successfully
+    links:
+      - "liquibase"
+  
+  origination:
+    container_name: "origination"
+    build:
+      context: ./origination/src/
+    environment:
+      HOST: "0.0.0.0"
+      PORT: 5002
+      ENGINE: "postgresql://postgres:postgres@postgresql:5432/origination"
+    expose:
+      - "5002"
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./common:/usr/local/lib/python3.10/site-packages/common:ro
+    restart: unless-stopped
+    networks:
+      - fintech-network
+    depends_on:
+      liquibase:
+        condition: service_completed_successfully
+    links:
+      - "liquibase"
+  
+  gateway:
+    container_name: "gateway"
+    build:
+      context: ./gateway/src/
+    environment:
+      HOST: "0.0.0.0"
+      PORT: 5000
+      PE_PATH: "pe:5001"
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./common:/usr/local/lib/python3.10/site-packages/common:ro
+    restart: unless-stopped
+    networks:
+      - fintech-network
+
+
+networks:
+  fintech-network:
+    name: "fintech-network"
