@@ -64,7 +64,6 @@ def create_agreement(repo: GenericRepository, repo2: GenericRepository, repo3: G
     client["email"] = info["email"]
     client["phone_number"] = info["phone"]
     prod = repo.get_by_condition(models.Product.product_id == info["product_code"])
-
     if len(prod) == 0:
         return 0
     prod = prod[0]
