@@ -14,17 +14,13 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-KAFKA_INSTANCE = "kafka:29092"
-topic = "new-agreements"
-
-@app.on_event("startup")
-async def startup_event():
-    app.state.producer = AIOKafkaProducer(bootstrap_servers=KAFKA_INSTANCE)
-    await app.state.producer.start()
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    await app.state.producer.stop()
+async def get_producer():
+    producer = AIOKafkaProducer(bootstrap_servers=os.getenv("KAFKA_INSTANCE"))
+    await producer.start()
+    try:
+        yield producer
+    finally:
+        await producer.stop()
 
 @app.get("/product", summary="Get a list of products")
 def read_products(repo: GenericRepository = Depends(CreateRepo(models.Product, SessionLocal()))):
@@ -54,7 +50,11 @@ def delete_product(product_id: str, repo: GenericRepository = Depends(CreateRepo
     return db_product
 
 @app.post("/agreement")
-async def post_agreement(d, repo: GenericRepository = Depends(CreateRepo(models.Product, SessionLocal())), repo2: GenericRepository = Depends(CreateRepo(models.Agreement, SessionLocal())),  repo3: GenericRepository = Depends(CreateRepo(models.Client, SessionLocal()))):
+async def post_agreement(d,
+                         repo: GenericRepository = Depends(CreateRepo(models.Product, SessionLocal())),
+                         repo2: GenericRepository = Depends(CreateRepo(models.Agreement, SessionLocal())),
+                         repo3: GenericRepository = Depends(CreateRepo(models.Client, SessionLocal())),
+                         producer = Depends(get_producer)):
     errors = ["No product with a given code",
               "Wrong data types",
               "Term is out of range",
@@ -73,7 +73,7 @@ async def post_agreement(d, repo: GenericRepository = Depends(CreateRepo(models.
         interest=agreement.interest,
         origination_amount=agreement.origination_amount
         )
-    await app.state.producer.send_and_wait("new-agreements", json.dumps(msg.dict()).encode("ascii"))
+    await producer.send_and_wait(os.getenv("TOPIC_AGREEMENTS"), json.dumps(msg.dict()).encode("ascii"))
     return agreement.agreement_id
 
 

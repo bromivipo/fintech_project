@@ -13,17 +13,16 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-KAFKA_INSTANCE = "kafka:29092"
-topic = "new-agreements"
-
 async def consume():
     consumer = AIOKafkaConsumer(
-        topic,
-        bootstrap_servers=KAFKA_INSTANCE,
+        os.getenv("TOPIC_AGREEMENTS"),
+        bootstrap_servers=os.getenv("KAFKA_INSTANCE"),
     )
     await consumer.start()
     try:
         async for message in consumer:
+            with open("logs.txt", "w") as file:
+                file.write(f"Received: {message.value.decode()}, topic: {message.topic}, offset: {message.offset}")
             print(f"Received: {message.value.decode()}, topic: {message.topic}, offset: {message.offset}")
     finally:
         await consumer.stop()
