@@ -3,13 +3,28 @@ from common.generic_repo import CreateRepo, GenericRepository
 from util import add_product, create_agreement
 from common import models
 from common.database import SessionLocal, engine
+from common.schemas import MsgToOrigination
 import os
 import uvicorn
+import json
+from aiokafka import AIOKafkaProducer
 from job import scheduler
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+KAFKA_INSTANCE = "kafka:29092"
+topic = "new-agreements"
+
+@app.on_event("startup")
+async def startup_event():
+    app.state.producer = AIOKafkaProducer(bootstrap_servers=KAFKA_INSTANCE)
+    await app.state.producer.start()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await app.state.producer.stop()
 
 @app.get("/product", summary="Get a list of products")
 def read_products(repo: GenericRepository = Depends(CreateRepo(models.Product, SessionLocal()))):
@@ -39,16 +54,27 @@ def delete_product(product_id: str, repo: GenericRepository = Depends(CreateRepo
     return db_product
 
 @app.post("/agreement")
-def post_agreement(d, repo: GenericRepository = Depends(CreateRepo(models.Product, SessionLocal())), repo2: GenericRepository = Depends(CreateRepo(models.Agreement, SessionLocal())),  repo3: GenericRepository = Depends(CreateRepo(models.Client, SessionLocal()))):
+async def post_agreement(d, repo: GenericRepository = Depends(CreateRepo(models.Product, SessionLocal())), repo2: GenericRepository = Depends(CreateRepo(models.Agreement, SessionLocal())),  repo3: GenericRepository = Depends(CreateRepo(models.Client, SessionLocal()))):
     errors = ["No product with a given code",
               "Wrong data types",
               "Term is out of range",
               "Interest is out of range",
               "Principle amount is out of range"]
-    agreement = create_agreement(repo, repo2, repo3, d)
-    if agreement <= 0:
-        raise HTTPException(status_code=400, detail=errors[-agreement])
-    return agreement
+    err, agreement = create_agreement(repo, repo2, repo3, d)
+    if err <= 0:
+        raise HTTPException(status_code=400, detail=errors[-err])
+    msg = MsgToOrigination(
+        name="kafka produce",
+        agreement_id=agreement.agreement_id,
+        product_id=agreement.product_id,
+        client_id=agreement.client_id,
+        term=agreement.term,
+        principle_amount=agreement.principle_amount,
+        interest=agreement.interest,
+        origination_amount=agreement.origination_amount
+        )
+    await app.state.producer.send_and_wait("new-agreements", json.dumps(msg.dict()).encode("ascii"))
+    return agreement.agreement_id
 
 
 if __name__ == '__main__':
