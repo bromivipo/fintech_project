@@ -68,6 +68,9 @@ services:
       PORT: 5001
       ENGINE: "postgresql://postgres:postgres@postgresql:5432/product_engine"
       ORIG_PATH: "origination:5002"
+      KAFKA_INSTANCE: "kafka:29092"
+      TOPIC_AGREEMENTS: "new-agreements"
+
     expose:
       - "5001"
     ports:
@@ -91,6 +94,8 @@ services:
       HOST: "0.0.0.0"
       PORT: 5002
       ENGINE: "postgresql://postgres:postgres@postgresql:5432/origination"
+      KAFKA_INSTANCE: "kafka:29092"
+      TOPIC_AGREEMENTS: "new-agreements"
     expose:
       - "5002"
     ports:

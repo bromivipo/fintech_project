@@ -47,16 +47,16 @@ def create_agreement(repo: GenericRepository, repo2: GenericRepository, repo3: G
         agreement["origination_amount"] = float(random.randint(prod.min_origination_amount, prod.max_origination_amount))
         agreement["principle_amount"] = float(info["disbursment_amount"]) + agreement["origination_amount"]
     except ValueError:
-        return -1
+        return -1, None
 
     if agreement["term"] > prod.max_term or agreement["term"] < prod.min_term:
-        return -2
+        return -2, None
     
     if agreement["interest"] > prod.max_interest or agreement["interest"] < prod.min_term:
-        return -3
+        return -3, None
     
     if agreement["principle_amount"] > prod.max_principle_amount or agreement["principle_amount"] < prod.min_principle_amount:
-        return -4
+        return -4, None
     
     client = check_client(repo3, client)
     agreement["client_id"] = int(client)
@@ -65,7 +65,7 @@ def create_agreement(repo: GenericRepository, repo2: GenericRepository, repo3: G
 
     new_agr = models.Agreement(agreement)
     repo2.add(new_agr)
-    return new_agr.agreement_id
+    return 200, new_agr
 
 
 def check_client(repo: GenericRepository, data):
