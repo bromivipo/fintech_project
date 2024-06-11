@@ -26,52 +26,43 @@ def add_product(data, repo: GenericRepository):
         return 200
 
 
-def create_agreement(repo: GenericRepository, repo2: GenericRepository, data):
+def create_application(repo: GenericRepository, data):
     info = json.loads(data)
-    client = {}
     agreement = {}
-    client["client_id"] = info["client_id"]
-    client["full_name"] = info["full_name"]
-    client["passport_details"] = info["passport_number"]
-    client["email"] = info["email"]
-    client["phone_number"] = info["phone"]
-    client["income"] = info["salary"]
-    client["birthday"] = info["birthday"]
+    agreement["agreement_id"] = info["agreement_id"]
+    with open("logs.txt", "a") as file:
+        file.write(f"agreement_id = {agreement['agreement_id']}")
+    agreement["client_id"] = info["client_id"]
     agreement["term"] = info["term"]
     agreement["interest"] = info["interest"]
     agreement["origination_amount"] = info["origination_amount"]
     agreement["principle_amount"] =info["principle_amount"]
-    client = check_client(repo, client)
-    agreement["client_id"] = client
     agreement["product_id"] = info["product_id"]
     agreement["agreement_status"] = "NEW"
 
-    new_agr = models.Agreement(agreement)
-    ans = check_agr(repo2, new_agr)
+    new_application = models.Application(agreement)
+    ans = check_application(repo, new_application)
     return ans
 
 
-def check_client(repo: GenericRepository, data):
-    client = repo.check_by_condition(models.Client.client_id == data["client_id"])
-    if client is None:
-        new = models.Client(data)
-        repo.add(new)
-        return new.client_id
-    else:
-        return client.client_id
-
-
-def check_agr(repo: GenericRepository, new_agr: models.Agreement):
-    agr = repo.check_by_condition(models.Agreement.agreement_id == new_agr.agreement_id)
+def check_application(repo: GenericRepository, new_application: models.Application):
+    agr = repo.check_by_condition(models.Application.agreement_id == new_application.agreement_id)
     if agr is None:
-        repo.add(new_agr)
-        return new_agr.agreement_id
+        repo.add(new_application)
+        return new_application.application_id
     else:
         return -1
 
-def check_and_delete_agr(repo: GenericRepository, agr_id):
-    agr = repo.check_by_condition(models.Agreement.agreement_id == agr_id)
+def check_and_delete_application(repo: GenericRepository, application_id):
+    agr = repo.check_by_condition(models.Application.application_id == application_id)
     if agr is None:
         return False
-    repo.delete_by_condition(models.Agreement.agreement_id == agr_id)
+    repo.delete_by_condition(models.Application.application_id == application_id)
     return True
+
+
+def set_application_status(repo: GenericRepository, msg):
+    msg_from_topic = json.loads(msg)
+    agr_id = msg_from_topic["agreement_id"]
+    status = msg_from_topic["result_status"]
+    repo.update_by_condition(models.Application.agreement_id==agr_id, "agreement_status", status)
