@@ -69,9 +69,7 @@ def create_agreement(repo: GenericRepository, repo2: GenericRepository, repo3: G
 
 
 def check_client(repo: GenericRepository, data):
-    client = repo.check_by_condition(models.Client.birthday == data["birthday"] and models.Client.email == data["email"] and \
-                                    models.Client.full_name == data["full_name"] and models.Client.passport_details == data["passport_details"] and \
-                                    models.Client.phone_number == data["phone_number"] and models.Client.income == data["income"])
+    client = repo.check_by_condition(models.Client.passport_details == data["passport_details"])
     if client is None:
         new = models.Client(data)
         repo.add(new)

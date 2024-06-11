@@ -96,6 +96,8 @@ services:
       ENGINE: "postgresql://postgres:postgres@postgresql:5432/origination"
       KAFKA_INSTANCE: "kafka:29092"
       TOPIC_AGREEMENTS: "new-agreements"
+      TOPIC_SCORING_REQUEST: "scoring-request"
+      TOPIC_SCORING_RESPONSE: "scoring-response"
     expose:
       - "5002"
     ports:
@@ -129,6 +131,20 @@ services:
     networks:
       - fintech-network
 
+  scoring:
+    container_name: "scoring"
+    build:
+      context: ./scoring/src/
+    environment:
+      TOPIC_SCORING_REQUEST: "scoring-request"
+      TOPIC_SCORING_RESPONSE: "scoring-response"
+      KAFKA_INSTANCE: "kafka:29092"
+      PE_PATH: "pe:5001"
+    volumes:
+      - ./common:/usr/local/lib/python3.10/site-packages/common:ro
+    restart: unless-stopped
+    networks:
+      - fintech-network
 
 networks:
   fintech-network:

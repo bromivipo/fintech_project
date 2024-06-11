@@ -8,30 +8,46 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
         http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
     
-    <changeSet author="brom" id="create-client">
+    <changeSet author="brom" id="create-application">
 
-        <createTable remarks="Table for info about clients" tableName="client">
-            <column remarks="unique id" autoIncrement="true" name="client_id" type="INTEGER">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="client_pkey"/>
+        <createTable  remarks="Table with info about applications" tableName="application">
+            <column remarks="unique id" autoIncrement="true" name="application_id"  type="INTEGER">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="application_pkey"/>
+            </column>
+
+            <column remarks="unique id" name="agreement_id" type="INTEGER">
+                <constraints nullable="false"/>
             </column>
             
-            <column remarks="name, second name and surname" name="full_name" type="VARCHAR">
+            <column remarks="product id from table product" name="product_id" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
 
-            <column remarks="current age of client in years" name="age" type="INTEGER">
+            <column remarks="client id from table client" name="client_id" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
 
-            <column remarks="clients phone number" name="phone_number" type="VARCHAR">
+            <column remarks="loan term in months in this agreement" name="term" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
 
-            <column remarks="passport series and number" name="passport_details" type="VARCHAR">
+            <column remarks="principle amount in this agreement" name="principle_amount" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
 
-            <column remarks="monthly income according to what client have said" name="income" type="INTEGER">
+            <column remarks="interest in this agreement" name="interest" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="origination amount in this agreement" name="origination_amount" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="date of signing the agreement" name="agreement_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+
+            <column remarks="new, activated or closed" name="agreement_status" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
 

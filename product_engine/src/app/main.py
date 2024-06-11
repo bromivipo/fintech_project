@@ -76,6 +76,9 @@ async def post_agreement(d,
     await producer.send_and_wait(os.getenv("TOPIC_AGREEMENTS"), json.dumps(msg.dict()).encode("ascii"))
     return agreement.agreement_id
 
+@app.get("/client_agreements", summary="All unclosed agreements for the client")
+def clients_agreements(client_id: int, repo: GenericRepository = Depends(CreateRepo(models.Agreement, SessionLocal()))):
+    return repo.get_by_condition(models.Agreement.client_id==client_id)
 
 if __name__ == '__main__':
     scheduler.start()
