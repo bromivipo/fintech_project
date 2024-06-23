@@ -70,6 +70,7 @@ services:
       ORIG_PATH: "origination:5002"
       KAFKA_INSTANCE: "kafka:29092"
       TOPIC_AGREEMENTS: "new-agreements"
+      TOPIC_SCORING_RESPONSE: "scoring-response"
 
     expose:
       - "5001"

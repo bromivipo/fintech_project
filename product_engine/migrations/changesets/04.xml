@@ -21,15 +21,11 @@
 
             <column remarks="time when payment should have been done" name="expected_payment_date" type="DATETIME"> </column>
 
-            <column remarks="date of the first day of paid period (if paid)" name="start_of_paid_period" type="DATETIME"> </column>
+            <column remarks="amount paid for body of loan(if paid)" name="principal_payment" type="DOUBLE"> </column>
 
-            <column remarks="date of the last day of paid period (if paid)" name="end_of_paid_period" type="DATETIME"> </column>
+            <column remarks="amount paid for percents of loan(if paid)" name="interest_payment" type="DOUBLE"> </column>
 
-            <column remarks="amount paid for body of loan(if paid)" name="amount_for_loan" type="INTEGER"> </column>
-
-            <column remarks="amount paid for percents of loan(if paid)" name="amount_for_percent" type="INTEGER"> </column>
-
-            <column remarks="serial number of payment in the agreement" name="serial_number" type="INTEGER">
+            <column remarks="serial number of payment in the agreement" name="period" type="INTEGER">
                 <constraints nullable="false"/>
             </column>
 

@@ -12,12 +12,14 @@ import uvicorn
 from job import start_scheduler
 
 models.Base.metadata.create_all(bind=engine)
-
 app = FastAPI()
 
 async def consume(topic, func, repo=GenericRepository(SessionLocal(), models.Application)):
     consumer = AIOKafkaConsumer(
         topic,
+        group_id="orig",
+        auto_offset_reset='earliest',
+        enable_auto_commit=True,
         bootstrap_servers=os.getenv("KAFKA_INSTANCE"),
     )
     await consumer.start()
@@ -64,7 +66,7 @@ if __name__=='__main__':
     config = uvicorn.Config(
         app=app,
         host=os.getenv("HOST"),
-        port=int(os.getenv("PORT")),
+        port=os.getenv("PORT"),
         loop=loop
     )
     server = uvicorn.Server(config)

@@ -1,18 +1,44 @@
 from fastapi import Depends, FastAPI, HTTPException
 from common.generic_repo import CreateRepo, GenericRepository
-from util import add_product, create_agreement
+from util import add_product, create_agreement, add_schedule_payment
 from common import models
 from common.database import SessionLocal, engine
 from common.schemas import MsgToOrigination
 import os
 import uvicorn
 import json
-from aiokafka import AIOKafkaProducer
-from job import scheduler
+import traceback
+from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
+import asyncio
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+async def consume(topic, 
+                  func, 
+                  repo_payment=GenericRepository(SessionLocal(), models.SchedulePayment),
+                  repo_agr=GenericRepository(SessionLocal(), models.Agreement)):
+    consumer = AIOKafkaConsumer(
+        topic,
+        group_id="pe",
+        auto_offset_reset='earliest',
+        enable_auto_commit=True,
+        bootstrap_servers=os.getenv("KAFKA_INSTANCE"),
+    )
+    await consumer.start()
+    try:
+        async for message in consumer:
+            with open("logs.txt", "a") as file:
+                file.write(f"Received: {message.value.decode()}, topic: {message.topic}, offset: {message.offset}\n")
+            func(repo_payment, repo_agr, message.value.decode())
+    except Exception:
+        with open("logs.txt", "a") as file:
+            file.write(traceback.format_exc())
+    finally:
+        with open("logs.txt", "a") as file:
+            file.write(f"Stopped")
+        await consumer.stop()
 
 async def get_producer():
     producer = AIOKafkaProducer(bootstrap_servers=os.getenv("KAFKA_INSTANCE"))
@@ -21,6 +47,8 @@ async def get_producer():
         yield producer
     finally:
         await producer.stop()
+
+
 
 @app.get("/product", summary="Get a list of products")
 def read_products(repo: GenericRepository = Depends(CreateRepo(models.Product, SessionLocal()))):
@@ -81,5 +109,20 @@ def clients_agreements(client_id: int, repo: GenericRepository = Depends(CreateR
     return repo.get_by_condition(models.Agreement.client_id==client_id)
 
 if __name__ == '__main__':
-    scheduler.start()
-    uvicorn.run(app, port=os.getenv("PORT"), host=os.getenv("HOST"))
+    with open("logs.txt", "a") as file:
+        file.write(f"Started\n")
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    loop.create_task(consume(os.getenv("TOPIC_SCORING_RESPONSE"),
+                             add_schedule_payment))
+    
+    config = uvicorn.Config(
+        app=app,
+        host=os.getenv("HOST"),
+        port=os.getenv("PORT"),
+        loop=loop
+    )
+    server = uvicorn.Server(config)
+    server_task = asyncio.ensure_future(server.serve())
+    loop.run_until_complete(server_task)

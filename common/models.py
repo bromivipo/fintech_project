@@ -56,6 +56,16 @@ class Client(Base):
         self.passport_details = client["passport_details"]
         self.income = client["income"]
 
+    def to_dict(self):
+        return {
+            "full_name": self.full_name,
+            "client_id": self.client_id,
+            "birthday": self.birthday,
+            "email": self.email,
+            "phone_number": self.phone_number,
+            "passport_details": self.passport_details,
+            "income": self.income
+        }
 
 class Agreement(Base):
 
@@ -80,6 +90,18 @@ class Agreement(Base):
         self.origination_amount = agreement["origination_amount"]
         self.agreement_date = datetime.datetime.now()
         self.agreement_status = "NEW"
+    
+    def to_dict(self):
+        return {
+            "product_id": self.product_id,
+            "client_id": self.client_id,
+            "term": self.term,
+            "principle_amount": self.principle_amount,
+            "interest": self.interest,
+            "origination_amount": self.origination_amount,
+            "agreement_date": self.agreement_date,
+            "agreement_status": self.agreement_status
+        }
 
 class Application(Base):
     __tablename__ = "application"
@@ -105,3 +127,23 @@ class Application(Base):
         self.origination_amount = agreement["origination_amount"]
         self.agreement_date = datetime.datetime.now()
         self.agreement_status = "NEW"
+
+class SchedulePayment(Base):
+
+    __tablename__ = "schedule_payment"
+
+    payment_id = Column(Integer, primary_key=True, autoincrement=True)
+    agreement_id = Column(Integer)
+    expected_payment_date = Column(DateTime)
+    principal_payment = Column(Double)
+    interest_payment = Column(Double)
+    period = Column(Integer)
+    payment_status = Column(String)
+
+    def __init__(self, schedule):
+        self.agreement_id = schedule["agreement_id"]
+        self.expected_payment_date = schedule["expected_payment_date"]
+        self.principal_payment = schedule["principal_payment"]
+        self.interest_payment = schedule["interest_payment"]
+        self.period = schedule["period"]
+        self.payment_status = schedule["payment_status"]
