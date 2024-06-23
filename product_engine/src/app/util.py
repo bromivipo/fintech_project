@@ -106,7 +106,7 @@ def payment_schedule(principal, interest, term, start_date):
     periods = range(1, term + 1)
     payment_schedule = []
     for period in periods:
-        payment_date = start_date + relativedelta(months=period - 1)
+        payment_date = start_date + relativedelta(months=period)
         principal_payment = npf.ppmt(monthly_interest_rate, period, term, -principal).round(2)
         interest_payment = npf.ipmt(monthly_interest_rate, period, term, -principal).round(2)
         payment_schedule.append({
