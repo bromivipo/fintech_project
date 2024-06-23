@@ -3,6 +3,10 @@ import datetime
 from common import models
 from common.generic_repo import GenericRepository
 import random
+import numpy_financial as npf
+import datetime
+from dateutil.relativedelta import relativedelta
+
 
 def add_product(data, repo: GenericRepository):
     ints = ['min_term', 'max_term', 'min_principle_amount', 'max_principle_amount', 'min_origination_amount', 'max_origination_amount']
@@ -81,3 +85,36 @@ def check_client(repo: GenericRepository, data):
 def update_status_new(ids, repo: GenericRepository):
     for id in ids:
         repo.update_by_condition(models.Agreement.agreement_id == id, "agreement_status", "SENT_TO_ORIGINATION")
+
+def add_schedule_payment(repo_payment: GenericRepository, repo_agr: GenericRepository, msg):
+    msg = json.loads(msg)
+    if msg["result_status"] != "CLOSED":
+        agr: models.Agreement = repo_agr.get_by_condition(models.Agreement.agreement_id == msg["agreement_id"])[0]
+        repo_agr.update_by_condition(models.Agreement.agreement_id == msg["agreement_id"], "agreement_status", "ACTIVE")
+        schedule_list = payment_schedule(agr.principle_amount, agr.interest, agr.term, agr.agreement_date)
+        for schedule in schedule_list:
+            data = schedule
+            data["agreement_id"] = agr.agreement_id
+            data["payment_status"] = "FUTURE"
+            payment = models.SchedulePayment(data)
+            repo_payment.add(payment)
+    else:
+        repo_agr.update_by_condition(models.Agreement.agreement_id == msg["agreement_id"], "agreement_status", "CLOSED")
+
+def payment_schedule(principal, interest, term, start_date):
+    monthly_interest_rate = interest / 12 / 100
+    periods = range(1, term + 1)
+    payment_schedule = []
+    for period in periods:
+        payment_date = start_date + relativedelta(months=period)
+        principal_payment = npf.ppmt(monthly_interest_rate, period, term, -principal).round(2)
+        interest_payment = npf.ipmt(monthly_interest_rate, period, term, -principal).round(2)
+        payment_schedule.append({
+            'expected_payment_date': payment_date,
+            'principal_payment': float(principal_payment),
+            'interest_payment': float(interest_payment),
+            'period': period
+        })
+    
+    return payment_schedule
+
