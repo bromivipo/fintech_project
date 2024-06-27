@@ -37,8 +37,6 @@ async def orig_job():
     except Exception:
         with open("logs.txt", "a") as file:
             file.write(traceback.format_exc())
-    with open("logs.txt", "a") as file:
-        file.write("job ended\n")
 
 async def start_scheduler():
     with open("logs.txt", "a") as file:

@@ -1,6 +1,6 @@
 from fastapi import Depends, FastAPI, HTTPException
 from common.generic_repo import CreateRepo, GenericRepository
-from util import add_product, create_agreement, add_schedule_payment
+from util import add_product, create_agreement, add_schedule_payment, receive_payment
 from common import models
 from common.database import SessionLocal, engine
 from common.schemas import MsgToOrigination
@@ -17,8 +17,7 @@ app = FastAPI()
 
 async def consume(topic, 
                   func, 
-                  repo_payment=GenericRepository(SessionLocal(), models.SchedulePayment),
-                  repo_agr=GenericRepository(SessionLocal(), models.Agreement)):
+                  *args):
     consumer = AIOKafkaConsumer(
         topic,
         group_id="pe",
@@ -31,7 +30,7 @@ async def consume(topic,
         async for message in consumer:
             with open("logs.txt", "a") as file:
                 file.write(f"Received: {message.value.decode()}, topic: {message.topic}, offset: {message.offset}\n")
-            func(repo_payment, repo_agr, message.value.decode())
+            func(message.value.decode(), *args)
     except Exception:
         with open("logs.txt", "a") as file:
             file.write(traceback.format_exc())
@@ -115,7 +114,12 @@ if __name__ == '__main__':
     asyncio.set_event_loop(loop)
 
     loop.create_task(consume(os.getenv("TOPIC_SCORING_RESPONSE"),
-                             add_schedule_payment))
+                             add_schedule_payment, 
+                             GenericRepository(SessionLocal(), models.SchedulePayment), 
+                             GenericRepository(SessionLocal(), models.Agreement)))
+    loop.create_task(consume(os.getenv("TOPIC_PAYMENT_RECEIVED"),
+                             receive_payment, 
+                             GenericRepository(SessionLocal(), models.SchedulePayment)))
     
     config = uvicorn.Config(
         app=app,

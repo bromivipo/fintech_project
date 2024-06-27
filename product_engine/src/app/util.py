@@ -2,6 +2,7 @@ import json
 import datetime
 from common import models
 from common.generic_repo import GenericRepository
+from common.schemas import MsgPaymentReceived
 import random
 import numpy_financial as npf
 import datetime
@@ -86,7 +87,7 @@ def update_status_new(ids, repo: GenericRepository):
     for id in ids:
         repo.update_by_condition(models.Agreement.agreement_id == id, "agreement_status", "SENT_TO_ORIGINATION")
 
-def add_schedule_payment(repo_payment: GenericRepository, repo_agr: GenericRepository, msg):
+def add_schedule_payment(msg, repo_payment: GenericRepository, repo_agr: GenericRepository):
     msg = json.loads(msg)
     if msg["result_status"] != "CLOSED":
         agr: models.Agreement = repo_agr.get_by_condition(models.Agreement.agreement_id == msg["agreement_id"])[0]
@@ -117,4 +118,15 @@ def payment_schedule(principal, interest, term, start_date):
         })
     
     return payment_schedule
+
+def receive_payment(msg, repo: GenericRepository):
+    msg = json.loads(msg)
+    payment_date = datetime.datetime.fromisoformat(msg["date"])
+    payments = repo.get_by_condition(models.SchedulePayment.agreement_id==msg["agreement_id"])
+    for payment in payments:
+        if payment_date <= payment.expected_payment_date:
+            if msg["payment"] == payment.principal_payment + payment.interest_payment:
+                repo.update_by_condition(models.SchedulePayment.payment_id==payment.payment_id, "payment_status", "PAID")
+            break
+
 
