@@ -25,6 +25,8 @@
 
             <column remarks="amount paid for percents of loan(if paid)" name="interest_payment" type="DOUBLE"> </column>
 
+            <column remarks="total amount paid (if paid)" name="total_payment" type="DOUBLE"> </column>
+            
             <column remarks="serial number of payment in the agreement" name="period" type="INTEGER">
                 <constraints nullable="false"/>
             </column>

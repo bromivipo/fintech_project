@@ -1,51 +1,29 @@
 from fastapi import Depends, FastAPI, HTTPException
-from common.generic_repo import CreateRepo, GenericRepository
+from common.generic_repo import GenericRepository
 from util import create_application, check_and_close_application, set_application_status
-from common import models
-from common.database import SessionLocal, engine
-from aiokafka import AIOKafkaConsumer
+from common.models.base import Base
+from common.models.application import Application
+from common.database import engine, get_db
+from common.kafka_common import consume
 import asyncio
-import json
-import traceback
 import os
 import uvicorn
 from job import start_scheduler
 
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
-async def consume(topic, func, repo=GenericRepository(SessionLocal(), models.Application)):
-    consumer = AIOKafkaConsumer(
-        topic,
-        group_id="orig",
-        auto_offset_reset='earliest',
-        enable_auto_commit=True,
-        bootstrap_servers=os.getenv("KAFKA_INSTANCE"),
-    )
-    await consumer.start()
-    try:
-        async for message in consumer:
-            with open("logs.txt", "a") as file:
-                file.write(f"Received: {message.value.decode()}, topic: {message.topic}, offset: {message.offset}\n")
-            func(repo, message.value.decode())
-    except Exception:
-        with open("logs.txt", "a") as file:
-            file.write(traceback.format_exc())
-    finally:
-        with open("logs.txt", "a") as file:
-            file.write(f"Stopped")
-        await consumer.stop()
-
 @app.post("/application", summary="Create an application, agreement + client info should be provided in json")
-def post_app(data, repo: GenericRepository = Depends(CreateRepo(models.Application, SessionLocal()))):
-    application = create_application(repo, data)
+def post_app(data):
+    application = create_application(data)
     if (application == -1):
         raise HTTPException(status_code=409, detail="Application already exists")
     return application
 
 
 @app.post("/application/{application_id}/close", summary="Close application. application_id = agreement_id")
-def delete_app(application_id, repo: GenericRepository = Depends(CreateRepo(models.Application, SessionLocal()))):
+def delete_app(application_id, db = Depends(get_db)):
+    repo = GenericRepository(db, Application)
     status = check_and_close_application(repo, application_id)
     if not status:
         raise HTTPException(status_code=404, detail="Application not found")
@@ -58,9 +36,9 @@ if __name__=='__main__':
     asyncio.set_event_loop(loop)
     
     loop.create_task(start_scheduler())
-    loop.create_task(consume(os.getenv("TOPIC_AGREEMENTS"),
-                                create_application))
-    loop.create_task(consume(os.getenv("TOPIC_SCORING_RESPONSE"),
+    loop.create_task(consume(os.getenv("TOPIC_AGREEMENTS"), "orig1",
+                            create_application))
+    loop.create_task(consume(os.getenv("TOPIC_SCORING_RESPONSE"), "orig2",
                              set_application_status))
     
     config = uvicorn.Config(
@@ -72,3 +50,5 @@ if __name__=='__main__':
     server = uvicorn.Server(config)
     server_task = asyncio.ensure_future(server.serve())
     loop.run_until_complete(server_task)
+
+    loop.close()
