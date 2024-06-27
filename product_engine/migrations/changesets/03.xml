@@ -39,7 +39,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column remarks="date of signing the agreement" name="agreement_date" type="DATETIME">
+            <column remarks="date of signing the agreement" name="agreement_date" type="TIMESTAMPTZ">
                 <constraints nullable="false"/>
             </column>
 

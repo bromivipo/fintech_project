@@ -1,4 +1,5 @@
 from pydantic import BaseModel, StrictStr
+from datetime import datetime
 
 class MsgToOrigination(BaseModel):
     name: StrictStr
@@ -22,3 +23,14 @@ class MsgFromScoring(BaseModel):
     product_id: StrictStr
     client_id: int
     result_status: StrictStr
+
+class MsgPaymentReceived(BaseModel):
+    agreement_id: int
+    date: datetime
+    payment: float
+
+class MsgPaymentOverdue(BaseModel):
+    client_id: int
+    agreement_id: int
+    overdue_date: str
+    payment: float

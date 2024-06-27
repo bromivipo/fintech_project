@@ -54,6 +54,8 @@ services:
       kafka-topics --bootstrap-server fintech-kafka:29092 --create --if-not-exists --topic new-agreements --replication-factor 1 --partitions 1
       kafka-topics --bootstrap-server fintech-kafka:29092 --create --if-not-exists --topic scoring-request --replication-factor 1 --partitions 1
       kafka-topics --bootstrap-server fintech-kafka:29092 --create --if-not-exists --topic scoring-response --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server fintech-kafka:29092 --create --if-not-exists --topic payment-received --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server fintech-kafka:29092 --create --if-not-exists --topic overdued-payments --replication-factor 1 --partitions 1
 
       echo -e 'Successfully created the following topics:'
       kafka-topics --bootstrap-server fintech-kafka:29092 --list

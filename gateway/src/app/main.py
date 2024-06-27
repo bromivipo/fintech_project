@@ -20,13 +20,30 @@ def get_product(product_code: str):
     raise HTTPException(r.status_code)
 
 
+@app.get("/client_agreements")
+def client_agr(client_id):
+    headers = {"Content-Type": "application/json"}
+    r = requests.get("http://{}/client_agreements".format(os.getenv("PE_PATH")), headers=headers, params={"client_id": client_id})
+    if r.status_code == 200: 
+        return r.json()
+    raise HTTPException(r.status_code)
+
+@app.get("/schedule_for_agreement")
+def schedule_for_agr(agr_id):
+    headers = {"Content-Type": "application/json"}
+    r = requests.get("http://{}/schedule_for_agreement".format(os.getenv("PE_PATH")), headers=headers, params={"agr_id": agr_id})
+    if r.status_code == 200: 
+        return r.json()
+    raise HTTPException(r.status_code)
+
+
 @app.post("/agreement", summary="""Post agreement, json with params of agreement should be forwarded(agreement_id, product_id, client_id, term, principle_amount, interest, origination_amount, agreement_date, agreement_status,""")
 def post_agr(d):
     headers = {"Content-Type": "application/json"}
     r = requests.post("http://{}/agreement".format(os.getenv("PE_PATH")), headers=headers, params={"d": d})
     if r.status_code == 200: 
         return r.json()
-    raise HTTPException(r.status_code)
+    raise HTTPException(r.status_code, r.json()["detail"])
 
 
 if __name__ == '__main__':

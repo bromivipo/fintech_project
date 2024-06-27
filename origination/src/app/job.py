@@ -1,7 +1,7 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 from common.generic_repo import CreateRepo, GenericRepository
-from common import models
+from common.models.application import Application
 from common.schemas import MsgToScoring
 from common.database import SessionLocal
 from aiokafka import AIOKafkaProducer
@@ -24,21 +24,17 @@ async def send_to_scoring(agreements):
         with open("logs.txt", "a") as file:
             file.write(f"agr{agr.agreement_id}, topic{os.getenv('TOPIC_SCORING_REQUEST')}\n")
         await producer.send_and_wait(os.getenv("TOPIC_SCORING_REQUEST"), json.dumps(msg.dict()).encode("ascii"))
-        with open("logs.txt", "a") as file:
-            file.write(f"sent\n")
     await producer.stop()
 
 async def orig_job():
-    repo = GenericRepository(SessionLocal(), models.Application)
+    repo = GenericRepository(SessionLocal(), Application)
     try:
-        agr = repo.get_by_condition(models.Application.agreement_status == "NEW")
-        repo.update_by_condition(models.Application.agreement_status == "NEW", "agreement_status", "SCORING")
+        agr = repo.get_by_condition(Application.agreement_status == "NEW")
+        repo.update_by_condition(Application.agreement_status == "NEW", "agreement_status", "SCORING")
         await send_to_scoring(agr)
     except Exception:
         with open("logs.txt", "a") as file:
             file.write(traceback.format_exc())
-    with open("logs.txt", "a") as file:
-        file.write("job ended\n")
 
 async def start_scheduler():
     with open("logs.txt", "a") as file:
