@@ -28,3 +28,9 @@ class MsgPaymentReceived(BaseModel):
     agreement_id: int
     date: datetime
     payment: float
+
+class MsgPaymentOverdue(BaseModel):
+    client_id: int
+    agreement_id: int
+    overdue_date: str
+    payment: float

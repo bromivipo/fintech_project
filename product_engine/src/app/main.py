@@ -4,6 +4,7 @@ from util import add_product, create_agreement, add_schedule_payment, receive_pa
 from common import models
 from common.database import SessionLocal, engine
 from common.schemas import MsgToOrigination
+from job import start_scheduler
 import os
 import uvicorn
 import json
@@ -112,7 +113,7 @@ if __name__ == '__main__':
         file.write(f"Started\n")
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-
+    loop.create_task(start_scheduler())
     loop.create_task(consume(os.getenv("TOPIC_SCORING_RESPONSE"),
                              add_schedule_payment, 
                              GenericRepository(SessionLocal(), models.SchedulePayment), 

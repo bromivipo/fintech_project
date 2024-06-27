@@ -71,6 +71,8 @@ services:
       KAFKA_INSTANCE: "kafka:29092"
       TOPIC_AGREEMENTS: "new-agreements"
       TOPIC_SCORING_RESPONSE: "scoring-response"
+      TOPIC_OVERDUED_PAYMENTS: "overdued-payments"
+      TOPIC_PAYMENT_RECEIVED: "payment-received"
 
     expose:
       - "5001"
@@ -120,12 +122,12 @@ services:
       context: ./gateway/src/
     environment:
       HOST: "0.0.0.0"
-      PORT: 5000
+      PORT: 5003
       PE_PATH: "pe:5001"
     expose:
-      - "5000"
+      - "5003"
     ports:
-      - "5000:5000"
+      - "5003:5003"
     volumes:
       - ./common:/usr/local/lib/python3.10/site-packages/common:ro
     restart: unless-stopped

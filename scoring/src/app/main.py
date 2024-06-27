@@ -9,6 +9,8 @@ async def consume_messages():
     consumer = AIOKafkaConsumer(
         os.getenv("TOPIC_SCORING_REQUEST"),
         bootstrap_servers=os.getenv("KAFKA_INSTANCE"),
+        group_id="scoring",
+        enable_auto_commit=True
     )
     await consumer.start()
     

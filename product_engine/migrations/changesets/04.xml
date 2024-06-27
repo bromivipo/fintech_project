@@ -19,7 +19,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column remarks="time when payment should have been done" name="expected_payment_date" type="DATETIME"> </column>
+            <column remarks="time when payment should have been done" name="expected_payment_date" type="TIMESTAMPTZ"> </column>
 
             <column remarks="amount paid for body of loan(if paid)" name="principal_payment" type="DOUBLE"> </column>
 

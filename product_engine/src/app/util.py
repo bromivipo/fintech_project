@@ -24,8 +24,8 @@ def add_product(data, repo: GenericRepository):
         except ValueError:
             return 400
     new_product = models.Product(new_product)
-    if repo.check_by_condition(models.Product.product_id == new_product.product_id \
-                                or (models.Product.product_name == new_product.product_name and models.Product.product_version == new_product.product_version)) is not None:
+    if repo.check_by_condition((models.Product.product_id == new_product.product_id) \
+                                | (models.Product.product_name == new_product.product_name) & (models.Product.product_version == new_product.product_version)) is not None:
         return 409
     else:
         repo.add(new_product)
@@ -122,10 +122,10 @@ def payment_schedule(principal, interest, term, start_date):
 def receive_payment(msg, repo: GenericRepository):
     msg = json.loads(msg)
     payment_date = datetime.datetime.fromisoformat(msg["date"])
-    payments = repo.get_by_condition(models.SchedulePayment.agreement_id==msg["agreement_id"])
+    payments = repo.get_by_condition((models.SchedulePayment.agreement_id==msg["agreement_id"]) & (models.SchedulePayment.payment_status=="FUTURE"))
     for payment in payments:
         if payment_date <= payment.expected_payment_date:
-            if msg["payment"] == payment.principal_payment + payment.interest_payment:
+            if abs(msg["payment"] - payment.principal_payment - payment.interest_payment) < 0.001:
                 repo.update_by_condition(models.SchedulePayment.payment_id==payment.payment_id, "payment_status", "PAID")
             break
 

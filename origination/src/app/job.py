@@ -24,8 +24,6 @@ async def send_to_scoring(agreements):
         with open("logs.txt", "a") as file:
             file.write(f"agr{agr.agreement_id}, topic{os.getenv('TOPIC_SCORING_REQUEST')}\n")
         await producer.send_and_wait(os.getenv("TOPIC_SCORING_REQUEST"), json.dumps(msg.dict()).encode("ascii"))
-        with open("logs.txt", "a") as file:
-            file.write(f"sent\n")
     await producer.stop()
 
 async def orig_job():

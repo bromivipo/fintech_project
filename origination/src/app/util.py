@@ -53,11 +53,11 @@ def check_application(repo: GenericRepository, new_application: models.Applicati
     else:
         return -1
 
-def check_and_delete_application(repo: GenericRepository, application_id):
+def check_and_close_application(repo: GenericRepository, application_id):
     agr = repo.check_by_condition(models.Application.application_id == application_id)
     if agr is None:
         return False
-    repo.delete_by_condition(models.Application.application_id == application_id)
+    repo.update_by_condition(models.Application.application_id == application_id, "agreement_status", "CLOSED")
     return True
 
 

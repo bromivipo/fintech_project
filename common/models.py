@@ -88,11 +88,12 @@ class Agreement(Base):
         self.principle_amount = agreement["principle_amount"]
         self.interest = agreement["interest"]
         self.origination_amount = agreement["origination_amount"]
-        self.agreement_date = datetime.datetime.now()
+        self.agreement_date = datetime.datetime.now(datetime.timezone.utc)
         self.agreement_status = "NEW"
     
     def to_dict(self):
         return {
+            "agreement_id": self.agreement_id,
             "product_id": self.product_id,
             "client_id": self.client_id,
             "term": self.term,

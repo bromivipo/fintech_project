@@ -1,6 +1,6 @@
 from fastapi import Depends, FastAPI, HTTPException
 from common.generic_repo import CreateRepo, GenericRepository
-from util import create_application, check_and_delete_application, set_application_status
+from util import create_application, check_and_close_application, set_application_status
 from common import models
 from common.database import SessionLocal, engine
 from aiokafka import AIOKafkaConsumer
@@ -46,7 +46,7 @@ def post_app(data, repo: GenericRepository = Depends(CreateRepo(models.Applicati
 
 @app.post("/application/{application_id}/close", summary="Close application. application_id = agreement_id")
 def delete_app(application_id, repo: GenericRepository = Depends(CreateRepo(models.Application, SessionLocal()))):
-    status = check_and_delete_application(repo, application_id)
+    status = check_and_close_application(repo, application_id)
     if not status:
         raise HTTPException(status_code=404, detail="Application not found")
 
